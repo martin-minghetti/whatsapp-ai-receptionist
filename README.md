@@ -8,6 +8,18 @@ Built for nutritionists, dentists, physiotherapists, salons — any business tha
 ![Tests](https://github.com/martin-minghetti/whatsapp-ai-receptionist/actions/workflows/tests.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+## Screenshots
+
+### Booking flow
+A client books a dental cleaning in natural language. The bot checks real-time availability, presents open slots, and confirms the appointment in Google Calendar.
+
+![Booking flow](public/screenshots/booking-flow.png)
+
+### Cancellation flow
+The bot finds the existing appointment, checks the cancellation policy (24h rule), and cancels with no fee.
+
+![Cancellation flow](public/screenshots/cancel-flow.png)
+
 ## How it works
 
 ```
