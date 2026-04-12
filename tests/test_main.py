@@ -75,9 +75,9 @@ def test_booking_intent_creates_event_without_payments(mocker):
             "calendar_id": "test",
             "calendar_owner_email": "test@test.com",
             "business_hours": {"start": "09:00", "end": "18:00"},
-            "services": [{"name": "Plan Nutricional", "price": 40000, "duration_minutes": 45}],
-            "locations": [{"name": "Consultorio Centro", "address": "Av. San Martín 123", "days": ["monday"]}],
-            "cancellation_policy": "24hs",
+            "services": [{"name": "Dental Cleaning", "price": 150, "duration_minutes": 45}],
+            "locations": [{"name": "Downtown Office", "address": "456 Oak Avenue, Springfield", "days": ["monday"]}],
+            "cancellation_policy": "24 hours in advance",
         }
     })
     mock_calendar = mocker.MagicMock()
@@ -85,15 +85,15 @@ def test_booking_intent_creates_event_without_payments(mocker):
     mocker.patch("core.main._get_calendar_client", return_value=mock_calendar)
     mock_send = mocker.patch("core.main.WA.send_text", new_callable=mocker.AsyncMock)
     mocker.patch("core.main.get_ai_response", return_value=(
-        'Confirmado tu turno. {"intent": "booking_confirmed", "service": "Plan Nutricional", '
-        '"date": "2027-03-16", "time": "10:00", "location": "Consultorio Centro", "user_name": "Ana"}'
+        'Your appointment is confirmed. {"intent": "booking_confirmed", "service": "Dental Cleaning", '
+        '"date": "2027-03-16", "time": "10:00", "location": "Downtown Office", "user_name": "Jane"}'
     ))
 
     import json
     import hashlib
     import hmac
     body = json.dumps({"entry": [{"changes": [{"value": {"messages": [
-        {"from": "5491112345678", "type": "text", "text": {"body": "quiero reservar"}}
+        {"from": "5491112345678", "type": "text", "text": {"body": "I want to book"}}
     ]}}]}]}).encode()
     sig = "sha256=" + hmac.new(b"appsecret", body, hashlib.sha256).hexdigest()
 

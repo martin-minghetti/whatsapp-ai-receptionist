@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def extract_phone_from_description(description: str) -> str | None:
-    match = re.search(r'Teléfono:\s*(\d+)', description or "")
+    match = re.search(r'Phone:\s*(\d+)', description or "")
     return match.group(1) if match else None
 
 
@@ -22,7 +22,7 @@ def format_reminder_message(template: str, event: dict) -> str:
 
     summary = event.get("summary", "")
     service_name = summary.split(" - ")[0] if " - " in summary else summary
-    location = event.get("location", "el lugar acordado")
+    location = event.get("location", "the agreed location")
 
     return template.format(time=time_str, location=location, service=service_name)
 

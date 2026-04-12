@@ -24,14 +24,14 @@ def test_payment_webhook_approved(mocker):
     """When payment is approved, calendar event is created and user is notified."""
     pending = {
         "phone": "5491112345678",
-        "service": "Plan Nutricional",
+        "service": "Dental Cleaning",
         "date": "2026-03-16",
         "time": "10:00",
-        "location": "Consultorio Centro",
-        "user_name": "Ana García",
-        "price": 40000,
+        "location": "Downtown Office",
+        "user_name": "Jane Smith",
+        "price": 150,
         "duration_minutes": 45,
-        "location_address": "Av. San Martín 123, Bariloche",
+        "location_address": "456 Oak Avenue, Springfield",
     }
     mock_redis = MagicMock()
     mock_redis.get.return_value = json.dumps(pending)
@@ -57,21 +57,21 @@ def test_payment_webhook_approved(mocker):
     assert resp.status_code == 200
     mock_calendar.create_event.assert_called_once()
     mock_send.assert_called_once()
-    assert "confirmado" in mock_send.call_args[0][1].lower()
+    assert "confirmed" in mock_send.call_args[0][1].lower()
 
 
 def test_payment_webhook_rejected(mocker):
     """When payment is rejected, user is notified and slot is released."""
     pending = {
         "phone": "5491112345678",
-        "service": "Plan Nutricional",
+        "service": "Dental Cleaning",
         "date": "2026-03-16",
         "time": "10:00",
-        "location": "Consultorio Centro",
-        "user_name": "Ana García",
-        "price": 40000,
+        "location": "Downtown Office",
+        "user_name": "Jane Smith",
+        "price": 150,
         "duration_minutes": 45,
-        "location_address": "Av. San Martín 123, Bariloche",
+        "location_address": "456 Oak Avenue, Springfield",
     }
     mock_redis = MagicMock()
     mock_redis.get.return_value = json.dumps(pending)

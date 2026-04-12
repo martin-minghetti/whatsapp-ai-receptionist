@@ -30,8 +30,8 @@ def test_create_preference(monkeypatch):
         }
         client = MPClient(sandbox=True)
         result = client.create_preference(
-            title="Plan Nutricional",
-            price=40000,
+            title="Dental Cleaning",
+            price=150,
             external_reference="5491112345678",
         )
         assert result["preference_id"] == "pref_123"
@@ -53,8 +53,8 @@ def test_create_preference_uses_init_point_when_not_sandbox(monkeypatch):
         }
         client = MPClient(sandbox=False)
         result = client.create_preference(
-            title="Plan Nutricional",
-            price=40000,
+            title="Dental Cleaning",
+            price=150,
             external_reference="5491112345678",
         )
         assert "sandbox" not in result["payment_url"]

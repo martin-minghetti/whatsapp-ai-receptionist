@@ -92,9 +92,9 @@ class CalendarClient:
         end_dt = start_dt + timedelta(minutes=duration_minutes)
 
         description = (
-            f"Servicio: {service_name}\n"
-            f"Valor: ${price:,}\n"
-            f"Teléfono: {user_phone}"
+            f"Service: {service_name}\n"
+            f"Price: ${price:,}\n"
+            f"Phone: {user_phone}"
         )
 
         event = {
@@ -128,17 +128,17 @@ class CalendarClient:
             desc = event.get("description", "")
             if phone in desc:
                 start = event["start"].get("dateTime", "")
-                # Format date as human-readable Spanish
+                # Format date as human-readable English
                 date_str = start[:10] if start else ""
                 if date_str:
                     from datetime import date as date_cls
                     d = date_cls.fromisoformat(date_str)
-                    day_names = {0: "Lunes", 1: "Martes", 2: "Miércoles", 3: "Jueves",
-                                 4: "Viernes", 5: "Sábado", 6: "Domingo"}
-                    month_names = {1: "enero", 2: "febrero", 3: "marzo", 4: "abril",
-                                   5: "mayo", 6: "junio", 7: "julio", 8: "agosto",
-                                   9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"}
-                    date_str = f"{day_names[d.weekday()]} {d.day} de {month_names[d.month]}, {d.year}"
+                    day_names = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday",
+                                 4: "Friday", 5: "Saturday", 6: "Sunday"}
+                    month_names = {1: "January", 2: "February", 3: "March", 4: "April",
+                                   5: "May", 6: "June", 7: "July", 8: "August",
+                                   9: "September", 10: "October", 11: "November", 12: "December"}
+                    date_str = f"{day_names[d.weekday()]} {month_names[d.month]} {d.day}, {d.year}"
                 matching.append({
                     "id": event["id"],
                     "summary": event.get("summary", ""),

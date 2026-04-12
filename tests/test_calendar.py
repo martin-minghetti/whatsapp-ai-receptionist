@@ -23,7 +23,7 @@ def make_client():
 
 
 def test_slot_dataclass():
-    s = Slot(date=date(2026, 3, 16), start_time=time(10, 0), location="Consultorio Centro")
+    s = Slot(date=date(2026, 3, 16), start_time=time(10, 0), location="Downtown Office")
     assert s.date == date(2026, 3, 16)
 
 
@@ -53,17 +53,17 @@ def test_create_event(monkeypatch):
     client, mock_service = make_client()
     mock_service.events().insert().execute.return_value = {"id": "event123"}
     event_id = client.create_event(
-        service_name="Plan Nutricional",
-        user_name="Ana García",
+        service_name="Dental Cleaning",
+        user_name="Jane Smith",
         user_phone="5491112345678",
-        slot=Slot(date=date(2026, 3, 16), start_time=time(10, 0), location="Consultorio Centro"),
+        slot=Slot(date=date(2026, 3, 16), start_time=time(10, 0), location="Downtown Office"),
         duration_minutes=45,
-        location_address="Av. San Martín 123, Bariloche",
-        price=40000,
-        cancellation_policy="24hs antes",
+        location_address="456 Oak Avenue, Springfield",
+        price=150,
+        cancellation_policy="24 hours in advance",
     )
     assert event_id == "event123"
     call_args = mock_service.events().insert.call_args
     event_body = call_args[1]["body"]
-    assert "Plan Nutricional" in event_body["summary"]
+    assert "Dental Cleaning" in event_body["summary"]
     assert "5491112345678" in event_body["description"]

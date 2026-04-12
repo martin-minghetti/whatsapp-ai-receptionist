@@ -1,6 +1,6 @@
 client:
-  name: "Dra. María López - Nutricionista"
-  timezone: "America/Argentina/Buenos_Aires"
+  name: "Dr. Sarah Mitchell - Dentist"
+  timezone: "America/New_York"
 
 modules:
   booking: true
@@ -18,27 +18,27 @@ booking:
     start: "09:00"
     end: "18:00"
   services:
-    - name: "Consulta Nutricional"
+    - name: "Dental Cleaning"
       duration_minutes: 45
-      price: 40000
-    - name: "Evaluación Antropométrica"
+      price: 150
+    - name: "Dental Checkup"
       duration_minutes: 45
-      price: 40000
-    - name: "Consulta + Antropometría (combo)"
+      price: 120
+    - name: "Cleaning + Checkup (bundle)"
       duration_minutes: 45
-      price: 60000
-    - name: "Seguimiento"
+      price: 200
+    - name: "Follow-up"
       duration_minutes: 45
-      price: 40000
+      price: 80
   locations:
-    - name: "Consultorio Centro"
-      address: "Av. San Martín 123, Bariloche"
+    - name: "Downtown Office"
+      address: "456 Oak Avenue, Springfield"
       days: ["monday", "wednesday", "friday"]
-  cancellation_policy: "Las consultas pueden cancelarse hasta 24 horas antes. Pasado ese período se cobra el 40% del valor."
+  cancellation_policy: "Appointments can be cancelled up to 24 hours in advance. After that period, a 40% fee will be charged."
 
 payments:
   sandbox: true
 
 reminders:
   hours_before: 24
-  message_template: "Recordatorio: {service} mañana a las {time} en {location}. Cualquier consulta, escribinos acá."
+  message_template: "Reminder: {service} tomorrow at {time} at {location}. If you have any questions, message us here."

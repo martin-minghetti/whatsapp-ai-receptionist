@@ -41,7 +41,7 @@ _pending_cancellations: dict[str, list[dict]] = {}
 _message_locks: dict[str, float] = {}  # phone -> lock expiry timestamp
 
 # Keywords that indicate the user wants to modify an existing booking
-_MODIFICATION_KEYWORDS = {"cambiar", "modificar", "mover", "reprogramar", "cambio", "muevo", "paso"}
+_MODIFICATION_KEYWORDS = {"change", "modify", "move", "reschedule", "switch", "postpone", "cambiar", "modificar", "mover", "reprogramar"}
 
 
 def _get_mp_client() -> MPClient | None:
@@ -188,7 +188,7 @@ def _find_service(service_name: str) -> dict | None:
     for s in services:
         if s["name"].lower() == name:
             return s
-    # Substring match: prioritize longest match to avoid "Plan Nutricional" matching before "Plan + Antropometría (combo)"
+    # Substring match: prioritize longest match to avoid partial matches (e.g. "Dental Cleaning" matching before "Cleaning + Checkup (bundle)")
     matches = []
     for s in services:
         s_lower = s["name"].lower()
@@ -273,10 +273,10 @@ async def receive_message(request: Request):
                 logger.info("Audio transcribed for %s: %s", phone, user_text[:100])
             except Exception as e:
                 logger.error("Audio transcription failed: %s", e)
-                await WA.send_text(phone, "No pude procesar tu audio. ¿Podés escribirlo como texto?")
+                await WA.send_text(phone, "I couldn't process your audio. Could you send it as text instead?")
                 return Response(status_code=200)
         else:
-            await WA.send_text(phone, "Solo puedo procesar mensajes de texto y audio por ahora.")
+            await WA.send_text(phone, "I can only process text and audio messages for now.")
             return Response(status_code=200)
 
     except (KeyError, IndexError):
@@ -369,7 +369,7 @@ async def _handle_booking_intent(phone: str, intent: dict, visible_response: str
 
     if not service or not location:
         logger.error("Service or location not found. service='%s' location='%s'", intent.get('service'), intent.get('location'))
-        error_msg = "Hubo un problema procesando tu reserva. Por favor contactanos directamente."
+        error_msg = "There was a problem processing your booking. Please contact us directly."
         HISTORY.add(phone, "assistant", error_msg)
         await WA.send_text(phone, error_msg)
         return
@@ -379,7 +379,7 @@ async def _handle_booking_intent(phone: str, intent: dict, visible_response: str
         booking_time = dt_time.fromisoformat(intent["time"])
     except (ValueError, KeyError) as e:
         logger.warning("Invalid date/time in intent: %s", e)
-        error_msg = "Hubo un problema con la fecha de tu reserva. ¿Podés intentar de nuevo?"
+        error_msg = "There was a problem with your booking date. Could you try again?"
         HISTORY.add(phone, "assistant", error_msg)
         await WA.send_text(phone, error_msg)
         return
@@ -387,7 +387,7 @@ async def _handle_booking_intent(phone: str, intent: dict, visible_response: str
     # Validate date is not in the past
     if booking_date < date.today():
         logger.warning("Booking date in the past: %s", booking_date)
-        error_msg = "Esa fecha ya pasó. ¿Querés que te proponga las próximas fechas disponibles?"
+        error_msg = "That date has already passed. Would you like me to suggest the next available dates?"
         HISTORY.add(phone, "assistant", error_msg)
         await WA.send_text(phone, error_msg)
         return
@@ -396,8 +396,8 @@ async def _handle_booking_intent(phone: str, intent: dict, visible_response: str
 
     if not cal.is_slot_available(booking_date, booking_time, service["duration_minutes"]):
         sorry = (
-            f"Ese horario ({booking_date.strftime('%d/%m/%Y')} a las {booking_time.strftime('%H:%M')}) "
-            f"ya está ocupado. ¿Querés otro horario ese mismo día o preferís otro día?"
+            f"That time slot ({booking_date.strftime('%m/%d/%Y')} at {booking_time.strftime('%H:%M')}) "
+            f"is already taken. Would you like another time that same day or a different day?"
         )
         HISTORY.add(phone, "assistant", sorry)
         await WA.send_text(phone, sorry)
@@ -439,15 +439,14 @@ async def _handle_booking_intent(phone: str, intent: dict, visible_response: str
             price=service["price"],
             cancellation_policy=CONFIG["booking"].get("cancellation_policy", ""),
         )
-        mod_note = " (turno anterior cancelado)" if pending_mod else ""
+        mod_note = " (previous appointment cancelled)" if pending_mod else ""
         confirmation = (
             f"{visible_response}\n\n"
-            f"Turno confirmado{mod_note}: {service['name']} el {booking_date.strftime('%d/%m/%Y')} "
-            f"a las {booking_time.strftime('%H:%M')} en {location['address']}.\n\n"
-            f"El pago se realiza al finalizar el encuentro.\n"
-            f"El plan nutricional se entrega 7 días posteriores de realizado el encuentro.\n\n"
-            f"Política de cancelación: Las consultas son individuales y podrán cancelarse hasta con "
-            f"24 horas de anticipación. Pasado ese período, se cobrará un 40% del valor de la consulta."
+            f"Appointment confirmed{mod_note}: {service['name']} on {booking_date.strftime('%m/%d/%Y')} "
+            f"at {booking_time.strftime('%H:%M')} at {location['address']}.\n\n"
+            f"Payment is due at the end of the appointment.\n\n"
+            f"Cancellation policy: Appointments can be cancelled up to "
+            f"24 hours in advance. After that period, a 40% fee will be charged."
         )
         HISTORY.add(phone, "assistant", confirmation)
         await WA.send_text(phone, confirmation)
@@ -470,7 +469,7 @@ async def _handle_payment_flow(phone, intent, visible_response, service, locatio
     except Exception as e:
         logger.error("MP preference creation failed: %s", e)
         cal.release_slot(slot.date, slot.start_time)
-        await WA.send_text(phone, "Hubo un error generando el link de pago. Intentá de nuevo.")
+        await WA.send_text(phone, "There was an error generating the payment link. Please try again.")
         return
 
     # Store pending payment keyed by phone (= external_reference used in MP preference)
@@ -488,8 +487,8 @@ async def _handle_payment_flow(phone, intent, visible_response, service, locatio
 
     msg = (
         f"{visible_response}\n\n"
-        f"Para confirmar el turno, realizá el pago aquí:\n{pref['payment_url']}\n\n"
-        f"El turno queda reservado una vez acreditado el pago."
+        f"To confirm your appointment, complete the payment here:\n{pref['payment_url']}\n\n"
+        f"Your appointment will be reserved once the payment is processed."
     )
     HISTORY.add(phone, "assistant", msg)
     await WA.send_text(phone, msg)
@@ -545,9 +544,9 @@ async def payment_webhook(request: Request):
             )
             cal.release_slot(booking_date, booking_time)
         confirmation = (
-            f"Tu pago fue confirmado. Turno reservado: {pending['service']} "
-            f"el {pending['date']} a las {pending['time']} en {pending['location_address']}. "
-            f"Nos vemos!"
+            f"Your payment has been confirmed. Appointment booked: {pending['service']} "
+            f"on {pending['date']} at {pending['time']} at {pending['location_address']}. "
+            f"See you there!"
         )
         await WA.send_text(phone, confirmation)
     else:
@@ -557,7 +556,7 @@ async def payment_webhook(request: Request):
                 date.fromisoformat(pending["date"]),
                 dt_time.fromisoformat(pending["time"])
             )
-        await WA.send_text(phone, "El pago no fue procesado. Si querés intentarlo de nuevo, escribinos.")
+        await WA.send_text(phone, "The payment was not processed. If you'd like to try again, message us.")
 
     return Response(status_code=200)
 
@@ -566,13 +565,13 @@ async def _handle_cancellation_request(phone: str, visible_response: str):
     """User wants to cancel — find their upcoming events."""
     cal = _get_calendar_client()
     if cal is None:
-        await WA.send_text(phone, "El módulo de reservas no está disponible.")
+        await WA.send_text(phone, "The booking module is not available.")
         return
 
     events = cal.find_upcoming_events_by_phone(phone)
 
     if not events:
-        msg = "No encontré turnos reservados con tu número. ¿Necesitás algo más?"
+        msg = "I couldn't find any appointments booked with your number. Is there anything else I can help with?"
         HISTORY.add(phone, "assistant", msg)
         await WA.send_text(phone, msg)
         return
@@ -583,20 +582,20 @@ async def _handle_cancellation_request(phone: str, visible_response: str):
         e = events[0]
         msg = (
             f"{visible_response}\n\n"
-            f"Encontré este turno:\n"
+            f"I found this appointment:\n"
             f"*{e['summary']}*\n"
-            f"Fecha: {e['date']}\n"
-            f"Hora: {e['time']}\n"
-            f"Lugar: {e['location']}\n\n"
-            f"¿Confirmás que querés cancelarlo?"
+            f"Date: {e['date']}\n"
+            f"Time: {e['time']}\n"
+            f"Location: {e['location']}\n\n"
+            f"Do you confirm you want to cancel it?"
         )
     else:
-        lines = [f"{visible_response}\n\nEncontré estos turnos:\n"]
+        lines = [f"{visible_response}\n\nI found these appointments:\n"]
         for i, e in enumerate(events, 1):
             lines.append(
-                f"{i}. *{e['summary']}* — {e['date']} a las {e['time']} en {e['location']}"
+                f"{i}. *{e['summary']}* — {e['date']} at {e['time']} at {e['location']}"
             )
-        lines.append("\n¿Cuál querés cancelar?")
+        lines.append("\nWhich one would you like to cancel?")
         msg = "\n".join(lines)
 
     HISTORY.add(phone, "assistant", msg)
@@ -607,12 +606,12 @@ async def _handle_cancellation_confirmed(phone: str, intent: dict, visible_respo
     """User confirmed cancellation — delete the event."""
     cal = _get_calendar_client()
     if cal is None:
-        await WA.send_text(phone, "El módulo de reservas no está disponible.")
+        await WA.send_text(phone, "The booking module is not available.")
         return
 
     events = _get_pending_cancellation(phone)
     if not events:
-        msg = "No encontré una solicitud de cancelación activa. ¿Querés cancelar un turno? Decime y busco tus reservas."
+        msg = "I couldn't find an active cancellation request. Would you like to cancel an appointment? Let me know and I'll look up your bookings."
         HISTORY.add(phone, "assistant", msg)
         await WA.send_text(phone, msg)
         return
@@ -624,7 +623,7 @@ async def _handle_cancellation_confirmed(phone: str, intent: dict, visible_respo
         event_index = 1
 
     if event_index < 1 or event_index > len(events):
-        msg = f"Número inválido. Elegí un número del 1 al {len(events)}."
+        msg = f"Invalid number. Please choose a number from 1 to {len(events)}."
         HISTORY.add(phone, "assistant", msg)
         await WA.send_text(phone, msg)
         return
@@ -635,13 +634,13 @@ async def _handle_cancellation_confirmed(phone: str, intent: dict, visible_respo
         cal.delete_event(event["id"])
         _delete_pending_cancellation(phone)
         msg = (
-            f"Turno cancelado: *{event['summary']}* del {event['date']} a las {event['time']}.\n\n"
-            f"Si querés reservar otro turno, escribinos."
+            f"Appointment cancelled: *{event['summary']}* on {event['date']} at {event['time']}.\n\n"
+            f"If you'd like to book another appointment, just message us."
         )
         logger.info("Event cancelled: %s for phone %s", event["id"], phone)
     except Exception as e:
         logger.error("Failed to cancel event: %s", e)
-        msg = "Hubo un problema cancelando el turno. Por favor contactanos directamente."
+        msg = "There was a problem cancelling the appointment. Please contact us directly."
 
     HISTORY.add(phone, "assistant", msg)
     await WA.send_text(phone, msg)
@@ -652,13 +651,13 @@ async def _handle_modification_request(phone: str, visible_response: str):
     The old event is NOT deleted yet. It gets deleted when the new booking is confirmed."""
     cal = _get_calendar_client()
     if cal is None:
-        await WA.send_text(phone, "El módulo de reservas no está disponible.")
+        await WA.send_text(phone, "The booking module is not available.")
         return
 
     events = cal.find_upcoming_events_by_phone(phone)
 
     if not events:
-        msg = "No encontré turnos reservados con tu número. ¿Querés reservar uno nuevo?"
+        msg = "I couldn't find any appointments booked with your number. Would you like to book a new one?"
         HISTORY.add(phone, "assistant", msg)
         await WA.send_text(phone, msg)
         return
@@ -669,21 +668,21 @@ async def _handle_modification_request(phone: str, visible_response: str):
         _save_pending_modification(phone, e)
         msg = (
             f"{visible_response}\n\n"
-            f"Encontré tu turno:\n"
+            f"I found your appointment:\n"
             f"*{e['summary']}*\n"
-            f"Fecha: {e['date']}\n"
-            f"Hora: {e['time']}\n"
-            f"Lugar: {e['location']}\n\n"
-            f"¿Para qué fecha y horario lo querés cambiar?"
+            f"Date: {e['date']}\n"
+            f"Time: {e['time']}\n"
+            f"Location: {e['location']}\n\n"
+            f"What date and time would you like to change it to?"
         )
     else:
         _save_pending_cancellation(phone, events)
-        lines = [f"{visible_response}\n\nEncontré estos turnos:\n"]
+        lines = [f"{visible_response}\n\nI found these appointments:\n"]
         for i, e in enumerate(events, 1):
             lines.append(
-                f"{i}. *{e['summary']}* — {e['date']} a las {e['time']} en {e['location']}"
+                f"{i}. *{e['summary']}* — {e['date']} at {e['time']} at {e['location']}"
             )
-        lines.append("\n¿Cuál querés modificar?")
+        lines.append("\nWhich one would you like to modify?")
         msg = "\n".join(lines)
 
     HISTORY.add(phone, "assistant", msg)
@@ -694,12 +693,12 @@ async def _handle_modification_confirmed(phone: str, intent: dict, visible_respo
     """User chose which event to modify (multiple events case)."""
     cal = _get_calendar_client()
     if cal is None:
-        await WA.send_text(phone, "El módulo de reservas no está disponible.")
+        await WA.send_text(phone, "The booking module is not available.")
         return
 
     events = _get_pending_cancellation(phone)
     if not events:
-        msg = "No encontré una solicitud de modificación activa. Decime qué turno querés cambiar."
+        msg = "I couldn't find an active modification request. Let me know which appointment you'd like to change."
         HISTORY.add(phone, "assistant", msg)
         await WA.send_text(phone, msg)
         return
@@ -711,7 +710,7 @@ async def _handle_modification_confirmed(phone: str, intent: dict, visible_respo
         event_index = 1
 
     if event_index < 1 or event_index > len(events):
-        msg = f"Número inválido. Elegí un número del 1 al {len(events)}."
+        msg = f"Invalid number. Please choose a number from 1 to {len(events)}."
         HISTORY.add(phone, "assistant", msg)
         await WA.send_text(phone, msg)
         return
@@ -722,8 +721,8 @@ async def _handle_modification_confirmed(phone: str, intent: dict, visible_respo
     _save_pending_modification(phone, event)
 
     msg = (
-        f"Perfecto, vamos a modificar *{event['summary']}* del {event['date']} a las {event['time']}.\n\n"
-        f"¿Para qué fecha y horario lo querés cambiar?"
+        f"Sure, let's modify *{event['summary']}* on {event['date']} at {event['time']}.\n\n"
+        f"What date and time would you like to change it to?"
     )
     HISTORY.add(phone, "assistant", msg)
     await WA.send_text(phone, msg)

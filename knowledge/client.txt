@@ -1,36 +1,52 @@
-SERVICIOS Y PRECIOS
+SERVICES AND PRICES
 ===================
-Consulta Nutricional: $40.000 - 45 minutos
-Evaluación completa de hábitos alimenticios, estilo de vida y necesidades nutricionales.
-Incluye entrega de plan personalizado para trabajar en tus objetivos.
+Dental Cleaning: $150 - 45 minutes
+Professional teeth cleaning including plaque and tartar removal, polishing,
+and a fluoride treatment. Recommended every 6 months for optimal oral health.
 
-Evaluación Antropométrica: $40.000 - 45 minutos
-Evaluación precisa de la composición corporal mediante mediciones antropométricas
-para un control detallado de tu progreso.
+Dental Checkup: $120 - 45 minutes
+Comprehensive oral examination including digital X-rays, gum health assessment,
+and oral cancer screening. Includes a personalized treatment plan if needed.
 
-Promoción especial: Si en la primera consulta querés la consulta nutricional Y la evaluación
-antropométrica, el costo total es $60.000.
+Special offer: If you book a Dental Cleaning AND a Dental Checkup together,
+the total cost is $200 (save $70).
 
-Seguimiento: $40.000 - 45 minutos
+Follow-up: $80 - 45 minutes
+Post-treatment follow-up appointment to monitor healing and progress.
 
-SOBRE LA PROFESIONAL
-====================
-La Dra. María López es licenciada en nutrición. Atiende de forma presencial en Bariloche.
+ABOUT THE PROFESSIONAL
+======================
+Dr. Sarah Mitchell is a licensed dentist with over 12 years of experience
+in general and cosmetic dentistry. She graduated from Columbia University
+College of Dental Medicine and is a member of the American Dental Association.
+She sees patients in person at her Springfield office.
 
-DÍAS Y LUGARES
-==============
-Lunes, Miércoles y Viernes: Consultorio Centro — Av. San Martín 123, Bariloche
+DAYS AND LOCATIONS
+==================
+Monday, Wednesday, and Friday: Downtown Office — 456 Oak Avenue, Springfield
 
-CÓMO PREPARARSE
-===============
-Asistir con ropa liviana y ajustada (calzas cortas, shorts, remera).
-De ser posible, no comer ni beber en la hora previa al encuentro.
+HOW TO PREPARE FOR YOUR APPOINTMENT
+====================================
+- Brush and floss your teeth before arriving.
+- Arrive 10 minutes early to complete any paperwork if it's your first visit.
+- Bring a list of any medications you are currently taking.
+- If you have dental anxiety, let us know ahead of time so we can accommodate you.
+- Avoid eating or drinking anything (other than water) 30 minutes before your appointment.
 
-POLÍTICA DE CANCELACIÓN
-=======================
-Las consultas pueden cancelarse hasta 24 horas antes.
-Pasado ese período se cobra el 40% del valor de la consulta.
+CANCELLATION POLICY
+===================
+Appointments can be cancelled up to 24 hours in advance.
+After that period, a 40% fee of the appointment cost will be charged.
 
-ENTREGA DEL PLAN
-================
-El plan nutricional se entrega 7 días después del encuentro.
+INSURANCE INFORMATION
+=====================
+We accept most major dental insurance plans, including Delta Dental, Cigna,
+MetLife, and Aetna. Please bring your insurance card to your first visit.
+For patients without insurance, we offer flexible payment plans.
+Contact us for details.
+
+EMERGENCY CONTACT
+=================
+For dental emergencies outside of business hours, please call our
+emergency line at (555) 123-4567. Common emergencies include severe
+toothache, knocked-out teeth, broken crowns, and oral infections.
