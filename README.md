@@ -5,7 +5,7 @@ AI-powered WhatsApp bot that handles appointment scheduling for service-based bu
 Built for nutritionists, dentists, physiotherapists, salons — any business that runs on appointments.
 
 ![Python](https://img.shields.io/badge/Python-3.12+-blue)
-![Tests](https://img.shields.io/badge/tests-42%20passed-brightgreen)
+![Tests](https://github.com/martin-minghetti/whatsapp-ai-receptionist/actions/workflows/tests.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## How it works
