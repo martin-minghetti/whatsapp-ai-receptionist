@@ -1,0 +1,44 @@
+client:
+  name: "Dra. María López - Nutricionista"
+  timezone: "America/Argentina/Buenos_Aires"
+
+modules:
+  booking: true
+  payments: false
+  reminders: true
+
+whatsapp:
+  phone_number_id: "${WHATSAPP_PHONE_NUMBER_ID}"
+  verify_token: "${WHATSAPP_VERIFY_TOKEN}"
+
+booking:
+  calendar_id: "${GOOGLE_CALENDAR_ID}"
+  calendar_owner_email: "${GOOGLE_CALENDAR_OWNER_EMAIL}"
+  business_hours:
+    start: "09:00"
+    end: "18:00"
+  services:
+    - name: "Consulta Nutricional"
+      duration_minutes: 45
+      price: 40000
+    - name: "Evaluación Antropométrica"
+      duration_minutes: 45
+      price: 40000
+    - name: "Consulta + Antropometría (combo)"
+      duration_minutes: 45
+      price: 60000
+    - name: "Seguimiento"
+      duration_minutes: 45
+      price: 40000
+  locations:
+    - name: "Consultorio Centro"
+      address: "Av. San Martín 123, Bariloche"
+      days: ["monday", "wednesday", "friday"]
+  cancellation_policy: "Las consultas pueden cancelarse hasta 24 horas antes. Pasado ese período se cobra el 40% del valor."
+
+payments:
+  sandbox: true
+
+reminders:
+  hours_before: 24
+  message_template: "Recordatorio: {service} mañana a las {time} en {location}. Cualquier consulta, escribinos acá."
