@@ -1,12 +1,30 @@
 # WhatsApp AI Receptionist
 
-AI-powered WhatsApp bot that handles appointment scheduling for service-based businesses. Clients message on WhatsApp, the bot handles the conversation, checks real-time availability, and books directly into Google Calendar.
+**Your clients are messaging you on WhatsApp anyway. This bot answers them.**
 
-Built for nutritionists, dentists, physiotherapists, salons — any business that runs on appointments.
+Service businesses -- dentists, nutritionists, physiotherapists, salons -- lose bookings because nobody picks up the phone at 11pm. Clients message on WhatsApp, get no reply, and book elsewhere. The AI receptionist handles the conversation, checks real-time availability, and books directly into Google Calendar. No app to install, no portal to learn. Just WhatsApp.
 
 ![Python](https://img.shields.io/badge/Python-3.12+-blue)
 ![Tests](https://github.com/martin-minghetti/whatsapp-ai-receptionist/actions/workflows/tests.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+---
+
+## What it does
+
+| Capability | How |
+|---|---|
+| **Conversational booking** | Natural language via WhatsApp, powered by Claude |
+| **Real-time availability** | Google Calendar integration with slot locking |
+| **Full lifecycle** | Create, cancel, and modify appointments |
+| **Voice messages** | Audio transcribed via OpenAI Whisper |
+| **Smart dates** | "tomorrow", "next Wednesday", "next week" resolved to real dates |
+| **Reminders** | Automated WhatsApp messages 24h before appointments |
+| **Payments** | Optional Mercado Pago integration with checkout links |
+| **Multi-client ready** | YAML config + knowledge base per business, no code changes |
+| **Resilient state** | Redis in production, in-memory fallback for development |
+
+---
 
 ## Screenshots
 
@@ -19,6 +37,8 @@ A client books a dental cleaning in natural language. The bot checks real-time a
 The bot finds the existing appointment, checks the cancellation policy (24h rule), and cancels with no fee.
 
 ![Cancellation flow](public/screenshots/cancel-flow.png)
+
+---
 
 ## How it works
 
@@ -55,17 +75,18 @@ Client sends WhatsApp message
    Confirmation via WhatsApp
 ```
 
-## Features
+---
 
-- **Conversational booking** — natural language via WhatsApp, powered by Claude
-- **Google Calendar integration** — real-time availability checks, slot locking, event creation
-- **Full booking lifecycle** — create, cancel, and modify appointments
-- **Audio messages** — voice messages transcribed via OpenAI Whisper
-- **Smart date resolution** — "tomorrow", "next Wednesday", "next week" resolved to concrete dates
-- **Appointment reminders** — automated WhatsApp reminders 24h before appointments
-- **Optional payments** — Mercado Pago integration with checkout links and webhook confirmation
-- **Per-client configuration** — YAML config + knowledge base per business, no code changes needed
-- **Resilient** — Redis for production, in-memory fallback for development. Dual backend for history, locks, and pending state
+## Design principles
+
+- **No frameworks for the sake of frameworks.** Plain FastAPI with direct Anthropic SDK calls. No LangChain, no LangGraph. The problem is solved by ~50 lines of direct API calls.
+- **Config-driven, not code-driven.** New clients are onboarded by editing `config.yaml` and `knowledge/client.txt`. No code changes, no admin panel.
+- **Works offline from Redis.** Every stateful component has a Redis backend and an in-memory fallback. Run locally with zero infrastructure.
+- **Dates are pre-calculated.** LLMs are bad at date math. The system prompt injects the next 5 available booking dates on every request. Zero date hallucination.
+
+See [DECISIONS.md](DECISIONS.md) for the full rationale behind each technical choice.
+
+---
 
 ## Quick start
 
@@ -87,12 +108,12 @@ cp .env.example .env
 ```
 
 Required:
-- `ANTHROPIC_API_KEY` — [Get one here](https://console.anthropic.com/)
-- `WHATSAPP_ACCESS_TOKEN` + `WHATSAPP_PHONE_NUMBER_ID` + `WHATSAPP_APP_SECRET` — [Meta Developer Portal](https://developers.facebook.com/)
-- `WHATSAPP_VERIFY_TOKEN` — any string you choose (must match webhook config)
+- `ANTHROPIC_API_KEY` -- [Get one here](https://console.anthropic.com/)
+- `WHATSAPP_ACCESS_TOKEN` + `WHATSAPP_PHONE_NUMBER_ID` + `WHATSAPP_APP_SECRET` -- [Meta Developer Portal](https://developers.facebook.com/)
+- `WHATSAPP_VERIFY_TOKEN` -- any string you choose (must match webhook config)
 
 For booking (optional):
-- `GOOGLE_SERVICE_ACCOUNT_JSON` — base64-encoded Google service account credentials
+- `GOOGLE_SERVICE_ACCOUNT_JSON` -- base64-encoded Google service account credentials
 - `GOOGLE_CALENDAR_ID` + `GOOGLE_CALENDAR_OWNER_EMAIL`
 
 Edit `config.yaml` with your business details and `knowledge/client.txt` with your knowledge base.
@@ -111,9 +132,11 @@ Use [ngrok](https://ngrok.com/) for local development:
 ngrok http 8000
 ```
 
-Set the webhook URL in [Meta Developer Portal](https://developers.facebook.com/) → WhatsApp → Configuration:
+Set the webhook URL in [Meta Developer Portal](https://developers.facebook.com/) -> WhatsApp -> Configuration:
 - Callback URL: `https://your-ngrok-url.ngrok.io/webhook`
 - Verify token: same as your `WHATSAPP_VERIFY_TOKEN`
+
+---
 
 ## Configuration
 
@@ -150,13 +173,17 @@ booking:
 
 Free-text knowledge base about the business. The AI uses this to answer questions. Write it like you'd explain the business to a new receptionist.
 
+---
+
 ## Testing
 
 ```bash
 pytest tests/ -v
 ```
 
-42 tests covering all modules — webhook handling, AI intent extraction, calendar operations, payment flows, reminders, and configuration.
+42 tests covering all modules -- webhook handling, AI intent extraction, calendar operations, payment flows, reminders, and configuration.
+
+---
 
 ## Deploy
 
@@ -181,6 +208,8 @@ Any platform that runs Python + FastAPI works. The app starts with:
 ```bash
 uvicorn core.main:app --host 0.0.0.0 --port $PORT
 ```
+
+---
 
 ## Architecture
 
@@ -208,15 +237,27 @@ whatsapp-ai-receptionist/
 └── tests/               # 42 tests, full coverage
 ```
 
-### Key design decisions
+---
 
-See [DECISIONS.md](DECISIONS.md) for detailed rationale on technology choices.
+## Contributing
 
-**Intent extraction over function calling** — Claude generates a natural response with a JSON intent block appended. The system extracts the intent and routes to the appropriate handler. This keeps the conversation natural while enabling structured actions.
+Contributions are welcome. The codebase is intentionally small and direct -- please keep it that way.
 
-**Dual Redis/in-memory backend** — Every stateful component (history, locks, pending payments) works with Redis in production and falls back to in-memory for development. No Redis required to run locally.
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Make sure tests pass (`pytest tests/ -v`)
+4. Open a pull request
 
-**Config-driven, not code-driven** — New clients are onboarded by editing `config.yaml` and `knowledge/client.txt`. No code changes needed. The system prompt is dynamically generated from config.
+No issue template, no CLA. Just describe what you changed and why.
+
+---
+
+## Community
+
+- **Issues**: [GitHub Issues](https://github.com/martin-minghetti/whatsapp-ai-receptionist/issues) -- bug reports, feature requests, questions
+- **Discussions**: [GitHub Discussions](https://github.com/martin-minghetti/whatsapp-ai-receptionist/discussions) -- ideas, show & tell, general chat
+
+---
 
 ## License
 
