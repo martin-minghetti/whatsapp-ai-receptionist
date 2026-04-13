@@ -1,0 +1,23 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create release if not exists
+        run: |
+          if gh release view ${{ github.ref_name }} &>/dev/null; then
+            echo "Release ${{ github.ref_name }} already exists, skipping."
+          else
+            gh release create ${{ github.ref_name }} --generate-notes
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
