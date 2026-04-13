@@ -1,4 +1,4 @@
-# WhatsApp AI Receptionist
+<h1 align="center">WhatsApp AI Receptionist</h1>
 
 **Your clients are messaging you on WhatsApp anyway. This bot answers them.**
 
